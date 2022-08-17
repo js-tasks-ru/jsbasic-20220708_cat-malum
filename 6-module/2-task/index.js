@@ -1,3 +1,5 @@
+import createElement from '../../assets/lib/create-element.js';
+
 export default class ProductCard {
   #card
   #eventProductAdd
@@ -28,7 +30,6 @@ export default class ProductCard {
   productAdd() {
     this.#eventProductAdd = (event) => {
       if (event.target.closest('.card__button')) {
-        console.log(this.product.id)
         let eventBubbles = new CustomEvent('product-add', {
           detail: this.product.id,
           bubbles: true
