@@ -163,7 +163,7 @@ describe('8-module-1-task', () => {
             expect(getComputedStyle(cartIcon.elem).position).toBe('fixed');
 
             done();
-          }, 100);
+          }, 400);
         });
 
         it('иконка должна смещаться на 20px правее от первого элемент в документе с классом `container`', (done) => {
@@ -174,7 +174,7 @@ describe('8-module-1-task', () => {
             expect(`${actualLeftIndent}px`).toBe(`${expectedLeftIndent}px`);
 
             done();
-          }, 100);
+          }, 400);
         });
       });
 
@@ -192,7 +192,7 @@ describe('8-module-1-task', () => {
             expect(getComputedStyle(cartIcon.elem).position).toBe('fixed');
 
             done();
-          }, 100);
+          }, 400);
         });
 
         it('иконка должна смещаться на 10px левее главного контейнера', (done) => {
@@ -204,7 +204,7 @@ describe('8-module-1-task', () => {
             expect(`${actualLeftIndent}px`).toBe(`${expectedLeftIndent}px`);
 
             done();
-          }, 100);
+          }, 400);
         });
       });
 
