@@ -62,22 +62,26 @@ export default class CartIcon {
           left: '',
           zIndex: ''
         });
-      } else if (isMobile) {
+      }
+      
+      if (isMobile) {
         Object.assign(this.elem.style, {
           position: 'fixed',
           top: '',
           left: '',
           zIndex: ''
         });
-      } else if (window.pageYOffset === document.documentElement.scrollHeight) {
-        Object.assign(this.elem.style, {
-          position: 'fixed',
-          top: '50px',
-          zIndex: 1000,
-          right: '20px',
-          left: leftIndent
-        });
       }
+      
+      // if (window.pageYOffset === document.documentElement.scrollHeight) {
+      //   Object.assign(this.elem.style, {
+      //     position: 'fixed',
+      //     top: '50px',
+      //     zIndex: 1000,
+      //     right: '20px',
+      //     left: leftIndent
+      //   });
+      // }
     };
   }
 }
