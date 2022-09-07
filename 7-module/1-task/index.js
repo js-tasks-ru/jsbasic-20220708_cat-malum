@@ -6,7 +6,6 @@ export default class RibbonMenu {
     this._createRibbonMenu()
     this._scrollingMenu()
     this._selectCategory()
-    this._styleCategory()
   }
 
   _createRibbonMenu() {
@@ -79,7 +78,7 @@ export default class RibbonMenu {
       if (event.target === event.target.closest('.ribbon__item')) {
         event.preventDefault()
 
-        this._styleCategory(event.target)
+        this._styleCategory(event.target.dataset.id)
 
         this.customEvent = new CustomEvent('ribbon-select', {
           detail: event.target.dataset.id, 
@@ -97,10 +96,10 @@ export default class RibbonMenu {
     let categories = this.menu.querySelectorAll('a')
 
     for (let k of categories) {
-      k.classList.remove('.ribbon__item_active')
-
-      if (target === k) {
-        k.classList.add('.ribbon__item_active')
+      if (target === k.dataset.id) {
+        k.classList.add('ribbon__item_active')
+      } else {
+        k.classList.remove('ribbon__item_active')
       }
     }
   }

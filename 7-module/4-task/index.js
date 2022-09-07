@@ -1,124 +1,122 @@
 import createElement from '../../assets/lib/create-element.js';
 
 export default class StepSlider {
-  _slider
-  _sliderSteps
-  _spans
-  _changeValue
-  customEvent
-
   constructor({ steps, value = 0 }) {
-    this._render();
-    this._createSteps(steps, value);
-    this._stepsListener(steps)
-    this._dragnDrop(steps);
+    this.steps = steps;
+    this.segments = steps - 1;
+    this.render();
+    this.setValue(value);
+    this.eventListener();
   }
 
-  _render() { 
-    this._slider = createElement(`
+  render() { 
+    this.slider = createElement(`
       <div class="slider">
-        <div class="slider__thumb" style="left: 50%;">
+        <div class="slider__thumb">
           <span class="slider__value"></span>
         </div>
-        <div class="slider__progress" style="width: 50%;"></div>
-        <div class="slider__steps"></div>
+        <div class="slider__progress"></div>
+        <div class="slider__steps">
+          ${'<span></span>'.repeat(this.steps)}
+        </div>
       </div>
     `);
   }
 
-  _createSteps(steps, value) {
-    this._sliderSteps = this._slider.querySelector('.slider__steps');
+  setValue(value) {
+    this.value = value;
 
-    for (let i = 0; i < steps; i++) {
-      this._sliderSteps.innerHTML += '<span></span>';
-    };
+    let valuePercents = (value / this.segments) * 100;
 
-    this._spans = this._sliderSteps.querySelectorAll('span');
-    this._spans[value].classList.add('slider__step-active');
+    this.sub('thumb').style.left = `${valuePercents}%`;
+    this.sub('progress').style.width = `${valuePercents}%`;
+
+    this.sub('value').innerHTML = value;
+
+    if (this.sub('step-active')) {
+      this.sub('step-active').classList.remove('slider__step-active');
+    }
+
+    this.sub('steps').children[this.value].classList.add('slider__step-active');
   }
 
-  _stepsListener(steps) {
-    this._slider.addEventListener('click', (event) => {
-      let left = event.clientX - this._slider.getBoundingClientRect().left
-      let leftRelative = left / this._slider.offsetWidth
-      let segments = steps - 1
-      let approximateValue = leftRelative * segments
-      let value = Math.round(approximateValue)
-      let valuePercents = value / segments * 100
+  eventListener() {
+    this.sub('thumb').ondragstart = () => false;
 
-      this._slider.dispatchEvent(new CustomEvent('slider-change', {
-        detail: value,
-        bubbles: true
-      }))
-    })
-  }
+    this.sub('thumb').onpointerdown = this.onPointerDown;
 
-  _dragnDrop(steps) {
-    const slider = this._slider
-    const thumb = this._slider.querySelector('.slider__thumb');
-    const progress = this._slider.querySelector('.slider__progress');
-    const sliderValue = this._slider.querySelector('.slider__value');
-    let spans = this._spans;
+    this.slider.addEventListener('click', (event) => {
+      let newLeft = (event.clientX - this.slider.getBoundingClientRect().left) / this.slider.offsetWidth;
+      this.setValue(Math.round(newLeft * this.segments));
 
-    thumb.ondragstart = () => false;
-
-    thumb.onpointerdown = function(event) {
-      event.preventDefault();
-
-      slider.classList.add('slider_dragging');
-
-      document.addEventListener('pointermove', onPointerMove);
-      document.addEventListener('pointerup', onPointerUp);
-
-      function onPointerMove(event) {
-        let left = event.clientX - slider.getBoundingClientRect().left;
-        let leftRelative = left / slider.offsetWidth;
-
-        if (leftRelative < 0) {
-          leftRelative = 0;
-        };
-        
-        if (leftRelative > 1) {
-          leftRelative = 1;
-        };
-        
-        let leftPercents = leftRelative * 100;
-  
-        thumb.style.left = `${leftPercents}%`;
-        progress.style.width = `${leftPercents}%`;
-        
-        //Показ номера деления
-        let segments = steps - 1;
-        let approximateValue = leftRelative * segments;
-        this._changeValue = Math.round(approximateValue);
-  
-        sliderValue.textContent = this._changeValue;
-
-        //Подсветка делений
-        for (let i = 0; i < steps; i++) {
-          if (this._changeValue === i) {
-            spans[i].classList.add('slider__step-active');
-          } else {
-            spans[i].classList.remove('slider__step-active');
-          }
-        }
-      };
-  
-      function onPointerUp() {
-        document.removeEventListener('pointermove', onPointerMove);
-        document.removeEventListener('pointerup', onPointerUp);
-
-        slider.classList.remove('slider_dragging');
-        
-        slider.dispatchEvent(new CustomEvent('slider-change', {
-          detail: this._changeValue,
+      this.slider.dispatchEvent(
+        new CustomEvent('slider-change', {
+          detail: this.value,
           bubbles: true
-        }));
-      };
+        })
+      );
+    });
+  }
+
+  onPointerDown = event => {
+    event.preventDefault();
+
+    this.slider.classList.add('slider_dragging');
+
+    document.addEventListener('pointermove', this.onPointerMove);
+    document.addEventListener('pointerup', this.onPointerUp);
+  }
+
+  onPointerMove = event => {
+    event.preventDefault();
+
+    let newLeft = (event.clientX - this.slider.getBoundingClientRect().left) / this.slider.offsetWidth;
+
+    if (newLeft < 0) {
+      newLeft = 0;
     };
+    
+    if (newLeft > 1) {
+      newLeft = 1;
+    };
+
+    this.sub('thumb').style.left = `${newLeft * 100}%`;
+    this.sub('progress').style.width = `${newLeft * 100}%`;
+    
+    //Показ номера деления
+    this.changeValue = Math.round(newLeft * this.segments);
+    this.sub('value').textContent = this.changeValue;
+
+    //Подсветка делений
+    if (this.sub('step-active')) {
+      this.sub('step-active').classList.remove('slider__step-active');
+    }
+
+    this.sub('steps').children[this.changeValue].classList.add('slider__step-active');
+  }
+
+  onPointerUp = () => {
+    document.removeEventListener('pointermove', this.onPointerMove);
+    document.removeEventListener('pointerup', this.onPointerUp);
+
+    this.slider.classList.remove('slider_dragging');
+
+    this.sub('thumb').style.left = `${(this.changeValue / this.segments) * 100}%`;
+    this.sub('progress').style.width = `${(this.changeValue / this.segments) * 100}%`;
+    
+    this.slider.dispatchEvent(
+      new CustomEvent('slider-change', {
+        detail: this.changeValue,
+        bubbles: true
+      })
+    );
+  }
+
+  sub(ref) {
+    return this.slider.querySelector(`.slider__${ref}`);
   }
 
   get elem() {
-    return this._slider;
+    return this.slider;
   }
 }
